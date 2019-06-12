@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.DigestUtils;
 import pro.sunhao.seckill.dao.SeckillDao;
 import pro.sunhao.seckill.dao.SuccessSeckilledDao;
+import pro.sunhao.seckill.dao.cache.SeckillCache;
 import pro.sunhao.seckill.dto.Exposer;
 import pro.sunhao.seckill.dto.SeckillExecution;
 import pro.sunhao.seckill.exception.RepeatKillException;
@@ -29,11 +30,20 @@ public class SeckillServiceImpl implements SeckillService {
     @Autowired
     private SuccessSeckilledDao successSeckilledDao;
 
+    @Autowired
+    private SeckillCache seckillCache;
+
     @Override
     public Exposer exportSeckillUrl(long id) {
-        Seckill seckill = seckillDao.findBySeckillId(id);
-        if(seckill == null) {    // id错误
-            return new Exposer(false, id);
+        // 缓存优化
+        Seckill seckill = seckillCache.getSeckill(id);
+        if(seckill == null) {
+            seckill = seckillDao.findBySeckillId(id);
+            if(seckill == null) {    // id错误
+                return new Exposer(false, id);
+            } else {
+                seckillCache.putSeckill(seckill);
+            }
         }
         Date nowTime = new Date();
         if(nowTime.getTime() < seckill.getStartTime().getTime() || nowTime.getTime() > seckill.getEndTime().getTime()) {    // 不在时间范围内

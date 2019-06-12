@@ -10,7 +10,6 @@ import pro.sunhao.seckill.pojo.Seckill;
 import pro.sunhao.seckill.pojo.SuccessSeckilled;
 import pro.sunhao.seckill.service.SeckillService;
 
-import java.util.Date;
 import java.util.List;
 
 @RestController

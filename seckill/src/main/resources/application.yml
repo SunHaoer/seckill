@@ -10,3 +10,18 @@ spring:
         naming:
           physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
       show-sql: true
+  redis:
+    database: 0
+    host: 123.206.36.117
+    port: 6379
+    time-out: 0ms
+    jedis:
+      pool:
+        max-wait: 1000ms
+        min-idle: 1
+        max-idle: 10
+        max-active: 8
+
+
+
+
