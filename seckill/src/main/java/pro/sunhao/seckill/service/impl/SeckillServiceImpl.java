@@ -9,6 +9,7 @@ import pro.sunhao.seckill.dao.SuccessSeckilledDao;
 import pro.sunhao.seckill.dao.cache.SeckillCache;
 import pro.sunhao.seckill.dto.Exposer;
 import pro.sunhao.seckill.dto.SeckillExecution;
+import pro.sunhao.seckill.exception.RedisException;
 import pro.sunhao.seckill.exception.RepeatKillException;
 import pro.sunhao.seckill.exception.SeckillCloseException;
 import pro.sunhao.seckill.exception.SeckillException;
@@ -42,7 +43,10 @@ public class SeckillServiceImpl implements SeckillService {
             if(seckill == null) {    // id错误
                 return new Exposer(false, id);
             } else {
-                seckillCache.putSeckill(seckill);
+                boolean redisResult =  seckillCache.putSeckill(seckill);
+                if(redisResult == false) {
+                    throw new RedisException("put message to redis error");
+                }
             }
         }
         Date nowTime = new Date();
@@ -65,7 +69,7 @@ public class SeckillServiceImpl implements SeckillService {
                 throw new RepeatKillException("repeat seckill");
             }
             Date nowTime = new Date();
-            if(seckillDao.reduceNumber(id, nowTime) == 0) {    // 减库存
+            if(seckillDao.reduceNumber(id, nowTime) <= 0) {    // 减库存
                 throw new SeckillCloseException("seckill finished");
             }
             successSeckilled = new SuccessSeckilled(id, userPhone, 1, nowTime);
